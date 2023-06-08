@@ -780,7 +780,9 @@ int busybox_main(int argc UNUSED_PARAM, char **argv)
 
 		dup2(1, 2);
 		full_write2_str(bb_banner); /* reuse const string */
-		full_write2_str(" multi-call binary.\n"); /* reuse */
+        
+        // 20230608 bb
+		full_write2_str(" multi-call binary bb.\n"); /* reuse */
 		full_write2_str(
 			"BusyBox is copyrighted by many authors between 1998-2015.\n"
 			"Licensed under GPLv2. See source distribution for detailed\n"
@@ -891,6 +893,7 @@ int busybox_main(int argc UNUSED_PARAM, char **argv)
 		return 0;
 	}
 
+    //printf("argv[0] %s\n", argv[0]);
 	if (strcmp(argv[1], "--help") == 0) {
 		/* "busybox --help [<applet>]" */
 		if (!argv[2]
@@ -915,6 +918,7 @@ int busybox_main(int argc UNUSED_PARAM, char **argv)
 		 */
 		applet_name = bb_get_last_path_component_nostrip(argv[0]);
 	}
+    //printf("applet name %s\n", applet_name);
 	run_applet_and_exit(applet_name, argv);
 }
 # endif
@@ -1090,6 +1094,7 @@ int main(int argc UNUSED_PARAM, char **argv)
 	return SINGLE_APPLET_MAIN(argc, argv);
 # endif
 
+
 #elif !ENABLE_BUSYBOX && NUM_APPLETS == 0
 
 	full_write2_str(bb_basename(argv[0]));
@@ -1103,10 +1108,23 @@ int main(int argc UNUSED_PARAM, char **argv)
 	if (argv[1] && is_prefixed_with(bb_basename(argv[0]), "busybox"))
 		argv++;
 # endif
+
+
+    // 20230608
+    //printf("argv[0] %s\n", argv[0]);
 	applet_name = argv[0];
+
+    // 20230608 support name as "b" or "bb"
+    if ( strlen(applet_name) == 1 && applet_name[0] == 'b' )
+        applet_name = "busybox";
+    else if ( strlen(applet_name) == 2 && applet_name[0] == 'b' && applet_name[1] == 'b')
+        applet_name = "busybox";
+
+
 	if (applet_name[0] == '-')
 		applet_name++;
 	applet_name = bb_basename(applet_name);
+    //printf("applet name %s\n", applet_name);
 
 	/* If we are a result of execv("/proc/self/exe"), fix ugly comm of "exe" */
 	if (ENABLE_FEATURE_SH_STANDALONE
